@@ -1,0 +1,36 @@
+---
+title: "Project"
+output: html_document
+date: "2025-11-07"
+---
+
+```{r setup, include=FALSE}
+data <- read.csv("~/Downloads/wealth-inequality-by-country-2025.csv")
+```
+
+
+```{r}
+library(dplyr)
+
+data <- data %>%
+rename(GINI_Coeffecient = GiniCoefficientByCountry)
+
+```
+
+
+```{r}
+library(ggplot2)
+
+ggplot(data, aes(y = GINI_Coeffecient)) +
+geom_boxplot(na.rm = TRUE) +
+labs(title = "Distribution of GINI Coefficients", y = "GINI Coefficient") +
+theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+
+ggplot(data, aes(x = GINI_Coeffecient)) +
+geom_histogram(binwidth = 5) +
+labs(title = "Distribution of GINI Coefficients",
+x = "GINI Coefficient",
+y = "Number of Countries")
+```
+
+
