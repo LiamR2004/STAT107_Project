@@ -1,0 +1,36 @@
+```{r}
+wealth_data <- read.csv(file.choose())
+```
+```{r}
+education_data <- read.csv(file.choose())
+```
+
+```{r}
+library(dplyr)
+
+education_clean <- education_data %>%
+  select(
+    Country = Economy,
+    Education_Attainment = Educational.attainment..at.least.completed.primary..population.25..years..total......cumulative.
+  ) %>%
+  mutate(
+    Education_Attainment = as.numeric(Education_Attainment)
+  ) %>%
+  filter(!is.na(Education_Attainment))
+
+wealth_clean <- wealth_data %>%
+  select(
+    Country = 2,
+    Gini_Coefficient = 3
+  )
+
+combined_data <- education_clean %>%
+  inner_join(wealth_clean, by = "Country") %>%
+  arrange(Country)
+cat("Structure of combined dataset:\n")
+str(combined_data)
+
+```
+
+
+Above is the code we used to clean the data and combine both csvs into a single dataset
