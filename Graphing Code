@@ -1,0 +1,40 @@
+
+```{r}
+library(ggplot2)
+
+data <- read.csv("combined_data_simple.csv")
+
+cor_value <- cor(data$Education_Attainment, data$Gini_Coefficient)
+
+ggplot(data, aes(x = Education_Attainment, y = Gini_Coefficient)) +
+  geom_point(color = "blue", alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Education vs Wealth Inequality",
+       subtitle = paste("Correlation:", round(cor_value, 3)),
+       x = "Education Rate (%)", 
+       y = "Gini Coefficient")
+
+high <- data[order(-data$Gini_Coefficient), ][1:10, ]
+low <- data[order(data$Gini_Coefficient), ][1:10, ]
+
+high$Group <- "Top 10 Most unequal Countries by Gini"
+low$Group <- "Top 10 Most equal Countries by Gini"
+
+extreme <- rbind(high, low)
+
+ggplot() +
+  geom_point(data = data, aes(x = Education_Attainment, y = Gini_Coefficient), color = "gray") +
+  geom_point(data = extreme, aes(x = Education_Attainment, y = Gini_Coefficient, color = Group)) +
+  scale_color_manual(values = c("Top 10 Most unequal Countries by Gini" = "red", "Top 10 Most equal Countries by Gini" = "green")) +
+  labs(title = "Extreme Inequality Countries",
+       x = "Education Rate (%)",
+       y = "Gini Coefficient")
+
+ggplot(data, aes(x = Education_Attainment)) +
+  geom_histogram(fill = "blue", alpha = 0.7) +
+  labs(title = "Education Rates", x = "Education (%)", y = "Count")
+
+ggplot(data, aes(x = Gini_Coefficient)) +
+  geom_histogram(fill = "red", alpha = 0.7) +
+  labs(title = "Wealth Inequality", x = "Gini Coefficient", y = "Count")
+```
