@@ -1,29 +1,83 @@
 ---
 title: "FinalReport"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 date: "2025-11-08"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+wealth_data <- read.csv(file.choose())
+```
+```{r}
+education_data <- read.csv(file.choose())
 ```
 
-## R Markdown
+```{r}
+library(dplyr)
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+education_clean <- education_data %>%
+  select(
+    Country = Economy,
+    Education_Attainment = Educational.attainment..at.least.completed.primary..population.25..years..total......cumulative.
+  ) %>%
+  mutate(
+    Education_Attainment = as.numeric(Education_Attainment)
+  ) %>%
+  filter(!is.na(Education_Attainment))
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+wealth_clean <- wealth_data %>%
+  select(
+    Country = 2,
+    Gini_Coefficient = 3
+  )
 
-```{r cars}
-summary(cars)
+combined_data <- education_clean %>%
+  inner_join(wealth_clean, by = "Country") %>%
+  arrange(Country)
+cat("Structure of combined dataset:\n")
+str(combined_data)
+
 ```
 
-## Including Plots
+```{r}
+library(ggplot2)
 
-You can also embed plots, for example:
+data <- combined_data
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+cor_value <- cor(data$Education_Attainment, data$Gini_Coefficient)
+
+ggplot(data, aes(x = Education_Attainment, y = Gini_Coefficient)) +
+  geom_point(color = "blue", alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Education vs Wealth Inequality",
+       subtitle = paste("Correlation:", round(cor_value, 3)),
+       x = "Education Rate (%)", 
+       y = "Gini Coefficient")
+
+high <- data[order(-data$Gini_Coefficient), ][1:10, ]
+low <- data[order(data$Gini_Coefficient), ][1:10, ]
+
+high$Group <- "Top 10 Most unequal Countries by Gini"
+low$Group <- "Top 10 Most equal Countries by Gini"
+
+extreme <- rbind(high, low)
+
+ggplot() +
+  geom_point(data = data, aes(x = Education_Attainment, y = Gini_Coefficient), color = "gray") +
+  geom_point(data = extreme, aes(x = Education_Attainment, y = Gini_Coefficient, color = Group)) +
+  scale_color_manual(values = c("Top 10 Most unequal Countries by Gini" = "red", "Top 10 Most equal Countries by Gini" = "green")) +
+  labs(title = "Extreme Inequality Countries",
+       x = "Education Rate (%)",
+       y = "Gini Coefficient")
+
+ggplot(data, aes(x = Education_Attainment)) +
+  geom_histogram(fill = "blue", alpha = 0.7) +
+  labs(title = "Education Rates", x = "Education (%)", y = "Count")
+
+ggplot(data, aes(x = Gini_Coefficient)) +
+  geom_histogram(fill = "red", alpha = 0.7) +
+  labs(title = "Wealth Inequality", x = "Gini Coefficient", y = "Count")
 ```
-
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
